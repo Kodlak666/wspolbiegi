@@ -44,10 +44,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
     }
 
-    public override void Start(int numberOfBalls)
-    {
-      layerBellow.Start(numberOfBalls, StartHandler);
-    }
+    public override void Start(int numberOfBalls, double canvasWidth, double canvasHeight)
+        {
+            _canvasWidth = canvasWidth;
+            _canvasHeight = canvasHeight;
+            layerBellow.Start(numberOfBalls, StartHandler);
+        }
 
     #endregion ModelAbstractApi
 
@@ -58,16 +60,25 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     #endregion API
 
     #region private
+        
+        private bool Disposed = false;
+        private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable = null;
+        private readonly UnderneathLayerAPI layerBellow = null;
 
-    private bool Disposed = false;
-    private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable = null;
-    private readonly UnderneathLayerAPI layerBellow = null;
+        private readonly double _logicalWidth = 800;
+        private readonly double _logicalHeight = 400;
 
-    private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
-    {
-      ModelBall newBall = new ModelBall(position.x, position.y, ball) { Diameter = 20.0 };
-      BallChanged.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
-    }
+        private double _canvasWidth;
+        private double _canvasHeight;
+
+        private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
+        {
+            double scaleX = _canvasWidth / _logicalWidth;
+            double scaleY = _canvasHeight / _logicalHeight;
+
+            ModelBall newBall = new ModelBall(position.x, position.y, ball, scaleX, scaleY) { Diameter = 30.0 * scaleX};
+            BallChanged.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+        }
 
     #endregion private
 

@@ -26,7 +26,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       return modelInstance.Value;
     }
 
-    public abstract void Start(int numberOfBalls);
+    public abstract void Start(int numberOfBalls, double canvasWidth, double canvasHeight);
 
     #region IObservable
 

@@ -22,8 +22,8 @@ namespace TP.ConcurrentProgramming.Data
         private CancellationTokenSource? _cancelTokenSource;
         private readonly object _lock = new object();
 
-        private readonly double _boardWidth = 400;
-        private readonly double _boardHeight = 420;
+        private readonly double _boardWidth = 800;
+        private readonly double _boardHeight = 400;
 
         #region DataAbstractAPI
 
