@@ -32,12 +32,15 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     #region public API
 
-    public void Start(int numberOfBalls)
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(MainWindowViewModel));
-      ModelLayer.Start(numberOfBalls);
-      Observer.Dispose();
+        public double CanvasWidth { get; set; } = 400;
+        public double CanvasHeight { get; set; } = 420;
+
+        public void Start(int numberOfBalls) 
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(MainWindowViewModel));
+            ModelLayer.Start(numberOfBalls, CanvasWidth, CanvasHeight);
+            Observer.Dispose();
     }
 
     public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();

@@ -7,106 +7,138 @@
 //  https://github.com/mpostol/TP/discussions/182
 //
 //_____________________________________________________________________________________________________________________________________
-
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace TP.ConcurrentProgramming.Data
 {
-  internal class DataImplementation : DataAbstractAPI
-  {
-    #region ctor
-
-    public DataImplementation()
+    internal class DataImplementation : DataAbstractAPI
     {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
-    }
+        private bool Disposed = false;
+        private List<Ball> BallsList = new List<Ball>();
+        private CancellationTokenSource? _cancelTokenSource;
+        private readonly object _lock = new object();
 
-    #endregion ctor
+        private readonly double _boardWidth = 800;
+        private readonly double _boardHeight = 400;
 
-    #region DataAbstractAPI
+        #region DataAbstractAPI
 
-    public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(DataImplementation));
-      if (upperLayerHandler == null)
-        throw new ArgumentNullException(nameof(upperLayerHandler));
-      Random random = new Random();
-      for (int i = 0; i < numberOfBalls; i++)
-      {
-        Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-        Ball newBall = new(startingPosition, startingPosition);
-        upperLayerHandler(startingPosition, newBall);
-        BallsList.Add(newBall);
-      }
-    }
-
-    #endregion DataAbstractAPI
-
-    #region IDisposable
-
-    protected virtual void Dispose(bool disposing)
-    {
-      if (!Disposed)
-      {
-        if (disposing)
+        public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
         {
-          MoveTimer.Dispose();
-          BallsList.Clear();
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
+            if (upperLayerHandler == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+
+            BallsList.Clear();
+            _cancelTokenSource = new CancellationTokenSource();
+            Random random = new Random();
+
+            for (int i = 0; i < numberOfBalls; i++)
+            {
+                double ballDiameter = 30;
+                double initialX = random.NextDouble() * (_boardWidth - ballDiameter);
+                double initialY = random.NextDouble() * (_boardHeight - ballDiameter);
+                Vector startingPosition = new Vector(initialX, initialY);
+
+                double velX = (random.NextDouble() - 0.5) * 10;
+                double velY = (random.NextDouble() - 0.5) * 10;
+                Vector initialVelocity = new Vector(velX, velY);
+
+                Ball newBall = new Ball(startingPosition, initialVelocity, ballDiameter);
+                BallsList.Add(newBall);
+
+                upperLayerHandler(startingPosition, newBall);
+            }
+            Task.Run(() => SimulationLoop(_cancelTokenSource.Token));
         }
-        Disposed = true;
-      }
-      else
-        throw new ObjectDisposedException(nameof(DataImplementation));
+
+        #endregion DataAbstractAPI
+
+        #region Physics Simulation
+
+        private async Task SimulationLoop(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                lock (_lock)
+                {
+                    foreach (var ball in BallsList)
+                    {
+                        double nextX = ball.Position.x + ball.Velocity.x;
+                        double nextY = ball.Position.y + ball.Velocity.y;
+
+                        double currentVelX = ball.Velocity.x;
+                        double currentVelY = ball.Velocity.y;
+
+                        if (nextX <= 0 || nextX + ball.Diameter >= _boardWidth)
+                        {
+                            currentVelX = -currentVelX;
+                        }
+
+                        if (nextY <= 0 || nextY + ball.Diameter >= _boardHeight)
+                        {
+                            currentVelY = -currentVelY;
+                        }
+
+                        ball.Velocity = new Vector(currentVelX, currentVelY);
+                        ball.Move();
+                    }
+                }
+
+                await Task.Delay(16, token);
+            }
+        }
+
+        #endregion Physics Simulation
+
+        #region IDisposable
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!Disposed)
+            {
+                if (disposing)
+                {
+                    _cancelTokenSource?.Cancel();
+                    BallsList.Clear();
+                }
+                Disposed = true;
+            }
+        }
+
+        public override void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion IDisposable
+
+        #region TestingInfrastructure
+
+        [Conditional("DEBUG")]
+        internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)
+        {
+            returnBallsList(BallsList);
+        }
+
+        [Conditional("DEBUG")]
+        internal void CheckNumberOfBalls(Action<int> returnNumberOfBalls)
+        {
+            returnNumberOfBalls(BallsList.Count);
+        }
+
+        [Conditional("DEBUG")]
+        internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
+        {
+            returnInstanceDisposed(Disposed);
+        }
+
+        #endregion TestingInfrastructure
     }
-
-    public override void Dispose()
-    {
-      // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      Dispose(disposing: true);
-      GC.SuppressFinalize(this);
-    }
-
-    #endregion IDisposable
-
-    #region private
-
-    //private bool disposedValue;
-    private bool Disposed = false;
-
-    private readonly Timer MoveTimer;
-    private Random RandomGenerator = new();
-    private List<Ball> BallsList = [];
-
-    private void Move(object? x)
-    {
-      foreach (Ball item in BallsList)
-        item.Move(new Vector((RandomGenerator.NextDouble() - 0.5) * 10, (RandomGenerator.NextDouble() - 0.5) * 10));
-    }
-
-    #endregion private
-
-    #region TestingInfrastructure
-
-    [Conditional("DEBUG")]
-    internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)
-    {
-      returnBallsList(BallsList);
-    }
-
-    [Conditional("DEBUG")]
-    internal void CheckNumberOfBalls(Action<int> returnNumberOfBalls)
-    {
-      returnNumberOfBalls(BallsList.Count);
-    }
-
-    [Conditional("DEBUG")]
-    internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
-    {
-      returnInstanceDisposed(Disposed);
-    }
-
-    #endregion TestingInfrastructure
-  }
 }
