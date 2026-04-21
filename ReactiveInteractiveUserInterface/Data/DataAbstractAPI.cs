@@ -58,5 +58,7 @@ namespace TP.ConcurrentProgramming.Data
     event EventHandler<IVector> NewPositionNotification;
 
     IVector Velocity { get; set; }
-  }
+
+    double Diameter { get; }
+    }
 }
