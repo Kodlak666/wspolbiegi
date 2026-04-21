@@ -51,7 +51,7 @@ namespace TP.ConcurrentProgramming.CommonDataConsistency
     {
       for (int i = 0; i < 1000000; i++)
       {
-        int _value = 200 * m_Random.Next(0, 10000);
+        int _value = m_Random.Next(0, 10000);
         m_IntegerA = _value;
         m_IntegerB = -_value;
         IsConsistent &= m_IntegerA + m_IntegerB == 0;
