@@ -23,7 +23,7 @@ namespace TP.ConcurrentProgramming.Data
         private readonly object _lock = new object();
 
         private readonly double _boardWidth = 400;
-        private readonly double _boardHeight = 400;
+        private readonly double _boardHeight = 420;
 
         #region DataAbstractAPI
 
