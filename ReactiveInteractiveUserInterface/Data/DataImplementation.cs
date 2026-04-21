@@ -75,12 +75,12 @@ namespace TP.ConcurrentProgramming.Data
                         double currentVelX = ball.Velocity.x;
                         double currentVelY = ball.Velocity.y;
 
-                        if (nextX <= 0 || nextX + ball.Diameter >= _boardWidth)
+                        if (nextX <= 0 || nextX + ball.Diameter >= _boardWidth - 8)
                         {
                             currentVelX = -currentVelX;
                         }
 
-                        if (nextY <= 0 || nextY + ball.Diameter >= _boardHeight)
+                        if (nextY <= 0 || nextY + ball.Diameter / 2 >= _boardHeight - 4)
                         {
                             currentVelY = -currentVelY;
                         }
