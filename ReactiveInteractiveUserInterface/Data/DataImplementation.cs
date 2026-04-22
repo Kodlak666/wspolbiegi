@@ -22,6 +22,7 @@ namespace TP.ConcurrentProgramming.Data
         private CancellationTokenSource? _cancelTokenSource;
         private readonly object _lock = new object();
 
+
         private readonly double _boardWidth = 800;
         private readonly double _boardHeight = 400;
 
@@ -29,6 +30,7 @@ namespace TP.ConcurrentProgramming.Data
 
         public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
         {
+            double speed = 1000;
             if (Disposed)
                 throw new ObjectDisposedException(nameof(DataImplementation));
             if (upperLayerHandler == null)
@@ -45,8 +47,8 @@ namespace TP.ConcurrentProgramming.Data
                 double initialY = random.NextDouble() * (_boardHeight - ballDiameter);
                 Vector startingPosition = new Vector(initialX, initialY);
 
-                double velX = (random.NextDouble() - 0.5) * 10;
-                double velY = (random.NextDouble() - 0.5) * 10;
+                double velX = (random.NextDouble() - 0.5) * speed;
+                double velY = (random.NextDouble() - 0.5) * speed;
                 Vector initialVelocity = new Vector(velX, velY);
 
                 Ball newBall = new Ball(startingPosition, initialVelocity, ballDiameter);
