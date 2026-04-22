@@ -113,6 +113,8 @@ namespace TP.ConcurrentProgramming.Data
 
         public override void Dispose()
         {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
