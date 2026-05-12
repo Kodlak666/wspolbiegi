@@ -35,7 +35,7 @@ namespace TP.ConcurrentProgramming.Data.Test
             DataImplementation newInstance = new DataImplementation();
             bool newInstanceDisposed = false;
             newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
-            Assert.IsFalse(newInstanceDisposed);
+            Assert.IsFalse(newInstanceDisposed, $"isNewInstanceDisposed: {newInstanceDisposed}");
             newInstance.Dispose();
             newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
             Assert.IsTrue(newInstanceDisposed);
@@ -81,6 +81,5 @@ namespace TP.ConcurrentProgramming.Data.Test
                 Assert.IsTrue(moveCount > 1, $"Kula powinna wykonać ruch. Zarejestrowano {moveCount} powiadomień.");
             }
         }
-    }
     }
 }

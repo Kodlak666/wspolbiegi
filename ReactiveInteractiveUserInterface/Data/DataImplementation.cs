@@ -4,6 +4,7 @@ namespace TP.ConcurrentProgramming.Data
 {
     internal class DataImplementation : DataAbstractAPI
     {
+        private bool Disposed = false;
         private readonly List<Ball> _balls = new();
         private readonly Random _random = new();
         private CancellationTokenSource? _cancelSource;
@@ -55,17 +56,19 @@ namespace TP.ConcurrentProgramming.Data
 
         public override void Dispose()
         {
+            if (Disposed) throw new ObjectDisposedException(nameof(DataImplementation));
             _cancelSource?.Cancel();
             _cancelSource?.Dispose();
             _cancelSource = null;
             _balls.Clear();
+            Disposed = true;
         }
 
         [Conditional("DEBUG")]
         internal void CheckNumberOfBalls(Action<int> returnCount) => returnCount(_balls.Count);
 
         [Conditional("DEBUG")]
-        internal void CheckObjectDisposed(Action<bool> returnStatus) => returnStatus(_cancelSource == null);
+        internal void CheckObjectDisposed(Action<bool> returnStatus) => returnStatus(Disposed);
 
         [Conditional("DEBUG")]
         internal void CheckBallsList(Action<IEnumerable<IBall>> returnList) => returnList(_balls);

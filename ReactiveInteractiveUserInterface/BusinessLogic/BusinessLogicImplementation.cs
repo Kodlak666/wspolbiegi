@@ -53,12 +53,29 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             if (sender is not Data.IBall currentBall) return;
             CheckWallCollisions(currentBall);
 
+            var velocitySnapshots = _balls.ToDictionary(b => b, b => b.Velocity);
+
+            double accumulatedDx = 0;
+            double accumulatedDy = 0;
+
             lock (_ballsLock)
             {
+                var v1Snapshot = velocitySnapshots[currentBall];
+
                 foreach (var otherBall in _balls)
                 {
                     if (currentBall == otherBall) continue;
-                    CheckBallCollision(currentBall, otherBall);
+
+                    var v2Snapshot = velocitySnapshots[otherBall];
+                    var impulses = GetImpulse(currentBall, v1Snapshot, otherBall, v2Snapshot);
+
+                    accumulatedDx += impulses.dv1.x;
+                    accumulatedDy += impulses.dv1.y;
+                }
+
+                if (accumulatedDx != 0 || accumulatedDy != 0)
+                {
+                    currentBall.Velocity = new Data.Vector(v1Snapshot.x + accumulatedDx, v1Snapshot.y + accumulatedDy);
                 }
             }
         }
@@ -80,7 +97,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             if (bounced) ball.Velocity = new Data.Vector(newVx, newVy);
         }
 
-        private void CheckBallCollision(Data.IBall b1, Data.IBall b2)
+        private (Data.Vector dv1, Data.Vector dv2) GetImpulse(Data.IBall b1, Data.IVector v1, Data.IBall b2, Data.IVector v2)
         {
             object firstLock = b1.GetHashCode() < b2.GetHashCode() ? b1 : b2;
             object secondLock = b1.GetHashCode() < b2.GetHashCode() ? b2 : b1;
@@ -101,30 +118,23 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                     double distance = Math.Sqrt(dx * dx + dy * dy);
                     double minDistance = (b1.Diameter / 2) + (b2.Diameter / 2);
 
-                    if (distance < minDistance)
+                    double relativeVelocityX = v1.x - v2.x;
+                    double relativeVelocityY = v1.y - v2.y;
+                    double dot = relativeVelocityX * dx + relativeVelocityY * dy;
+
+                    if (distance <= minDistance && dot <= 0)
                     {
-                        var v1 = b1.Velocity;
-                        var v2 = b2.Velocity;
-
-                        double relativeVelocityX = v1.x - v2.x;
-                        double relativeVelocityY = v1.y - v2.y;
-                        if ((relativeVelocityX * dx + relativeVelocityY * dy) > 0) return;
-                        
-                        double m1 = b1.Mass;
-                        double m2 = b2.Mass;
-
-                        double commonPart = 2 * (v1.x * dx + v1.y * dy - v2.x * dx - v2.y * dy) / ((m1 + m2) * (dx * dx + dy * dy));
-
-                        double v1x = v1.x - commonPart * m2 * dx;
-                        double v1y = v1.y - commonPart * m2 * dy;
-                        double v2x = v2.x + commonPart * m1 * dx;
-                        double v2y = v2.y + commonPart * m1 * dy;
-
-                        b1.Velocity = new Data.Vector(v1x, v1y);
-                        b2.Velocity = new Data.Vector(v2x, v2y);
+                        double commonPart = 2 * dot / ((b1.Mass + b2.Mass) * (dx * dx + dy * dy));
+                        return (
+                                new Data.Vector(-commonPart * b2.Mass * dx, -commonPart * b2.Mass * dy),
+                                new Data.Vector(commonPart * b1.Mass * dx, commonPart * b1.Mass * dy)
+                               );
                     }
+
                 }
             }
+
+            return (new Data.Vector(0, 0), new Data.Vector(0, 0));
         }
 
         [Conditional("DEBUG")]
