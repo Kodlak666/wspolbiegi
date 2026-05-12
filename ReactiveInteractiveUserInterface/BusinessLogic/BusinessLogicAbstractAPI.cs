@@ -19,11 +19,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       return modelInstance.Value;
     }
 
-    #endregion Layer Factory
+        #endregion Layer Factory
 
-    #region Layer API
+        #region Layer API
 
-    public static readonly Dimensions GetDimensions = new(10.0, 10.0, 10.0);
+        public static Dimensions GetDimensions => new Dimensions(800, 400, 10);
 
     public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
 
@@ -61,5 +61,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
   public interface IBall 
   {
     event EventHandler<IPosition> NewPositionNotification;
+    double Diameter { get; }
   }
 }

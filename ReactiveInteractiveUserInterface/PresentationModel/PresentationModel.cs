@@ -3,10 +3,8 @@
 //  Copyright (C) 2024, Mariusz Postol LODZ POLAND.
 //
 //  To be in touch join the community by pressing the `Watch` button and get started commenting using the discussion panel at
-//
 //  https://github.com/mpostol/TP/discussions/182
 //_____________________________________________________________________________________________________________________________________
-
 using System;
 using System.Diagnostics;
 using System.Reactive;
@@ -15,55 +13,55 @@ using UnderneathLayerAPI = TP.ConcurrentProgramming.BusinessLogic.BusinessLogicA
 
 namespace TP.ConcurrentProgramming.Presentation.Model
 {
-  /// <summary>
-  /// Class Model - implements the <see cref="ModelAbstractApi" />
-  /// </summary>
-  internal class ModelImplementation : ModelAbstractApi
-  {
-    internal ModelImplementation() : this(null)
-    { }
-
-    internal ModelImplementation(UnderneathLayerAPI underneathLayer)
+    /// <summary>
+    /// Class Model - implements the <see cref="ModelAbstractApi" />
+    /// </summary>
+    internal class ModelImplementation : ModelAbstractApi
     {
-      layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetBusinessLogicLayer() : underneathLayer;
-      eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
-    }
+        internal ModelImplementation() : this(null)
+        { }
 
-    #region ModelAbstractApi
+        internal ModelImplementation(UnderneathLayerAPI? underneathLayer)
+        {
+            layerBellow = underneathLayer ?? UnderneathLayerAPI.GetBusinessLogicLayer();
+            eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
+        }
 
-    public override void Dispose()
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(Model));
-      layerBellow.Dispose();
-      Disposed = true;
-    }
+        #region ModelAbstractApi
 
-    public override IDisposable Subscribe(IObserver<IBall> observer)
-    {
-      return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
-    }
+        public override void Dispose()
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(ModelImplementation));
+            layerBellow.Dispose();
+            Disposed = true;
+        }
 
-    public override void Start(int numberOfBalls, double canvasWidth, double canvasHeight)
+        public override IDisposable Subscribe(IObserver<IBall> observer)
+        {
+            return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
+        }
+
+        public override void Start(int numberOfBalls, double canvasWidth, double canvasHeight)
         {
             _canvasWidth = canvasWidth;
             _canvasHeight = canvasHeight;
             layerBellow.Start(numberOfBalls, StartHandler);
         }
 
-    #endregion ModelAbstractApi
+        #endregion ModelAbstractApi
 
-    #region API
+        #region API
 
-    public event EventHandler<BallChaneEventArgs> BallChanged;
+        public event EventHandler<BallChaneEventArgs>? BallChanged;
 
-    #endregion API
+        #endregion API
 
-    #region private
-        
+        #region private
+
         private bool Disposed = false;
-        private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable = null;
-        private readonly UnderneathLayerAPI layerBellow = null;
+        private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable;
+        private readonly UnderneathLayerAPI layerBellow;
 
         private readonly double _logicalWidth = 800;
         private readonly double _logicalHeight = 400;
@@ -76,37 +74,41 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             double scaleX = _canvasWidth / _logicalWidth;
             double scaleY = _canvasHeight / _logicalHeight;
 
-            ModelBall newBall = new ModelBall(position.x, position.y, ball, scaleX, scaleY) { Diameter = 30.0 * scaleX};
-            BallChanged.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+            // Tworzymy nową kulę. Pamiętaj: w pliku ModelBall.cs właściwość Diameter musi wyglądać tak: 
+            // public double Diameter { get; set; }  <-- bez słówka private!
+            ModelBall newBall = new ModelBall(position.x, position.y, ball, scaleX, scaleY) { Diameter = ball.Diameter * scaleX };
+
+            // Bezpieczne wywołanie zdarzenia chroniące przed crashami
+            BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
         }
 
-    #endregion private
+        #endregion private
 
-    #region TestingInfrastructure
+        #region TestingInfrastructure
 
-    [Conditional("DEBUG")]
-    internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
-    {
-      returnInstanceDisposed(Disposed);
+        [Conditional("DEBUG")]
+        internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
+        {
+            returnInstanceDisposed(Disposed);
+        }
+
+        [Conditional("DEBUG")]
+        internal void CheckUnderneathLayerAPI(Action<UnderneathLayerAPI> returnNumberOfBalls)
+        {
+            returnNumberOfBalls(layerBellow);
+        }
+
+        [Conditional("DEBUG")]
+        internal void CheckBallChangedEvent(Action<bool> returnBallChangedIsNull)
+        {
+            returnBallChangedIsNull(BallChanged == null);
+        }
+
+        #endregion TestingInfrastructure
     }
 
-    [Conditional("DEBUG")]
-    internal void CheckUnderneathLayerAPI(Action<UnderneathLayerAPI> returnNumberOfBalls)
+    public class BallChaneEventArgs : EventArgs
     {
-      returnNumberOfBalls(layerBellow);
+        public IBall Ball { get; init; } = null!;
     }
-
-    [Conditional("DEBUG")]
-    internal void CheckBallChangedEvent(Action<bool> returnBallChangedIsNull)
-    {
-      returnBallChangedIsNull(BallChanged == null);
-    }
-
-    #endregion TestingInfrastructure
-  }
-
-  public class BallChaneEventArgs : EventArgs
-  {
-    public IBall Ball { get; init; }
-  }
 }

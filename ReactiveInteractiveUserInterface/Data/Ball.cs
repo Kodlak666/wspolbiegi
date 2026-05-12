@@ -1,50 +1,44 @@
-﻿//____________________________________________________________________________________________________________________________________
-//
-//  Copyright (C) 2024, Mariusz Postol LODZ POLAND.
-//
-//  To be in touch join the community by pressing the `Watch` button and get started commenting using the discussion panel at
-//
-//  https://github.com/mpostol/TP/discussions/182
-//
-//_____________________________________________________________________________________________________________________________________
+﻿using System;
 
 namespace TP.ConcurrentProgramming.Data
 {
-  internal class Ball : IBall
-  {
-    #region ctor
+    internal class Ball : IBall
+    {
+        private readonly object _lock = new object();
+        private Vector _position;
+        private IVector _velocity;
+
         public double Diameter { get; init; }
-        internal Vector Position { get; private set; }
-        internal Ball(Vector initialPosition, Vector initialVelocity, double diameter)
+        public double Mass { get; init; }
+
+        public IVector Position
         {
-            Position = initialPosition;
-            Velocity = initialVelocity;
-            Diameter = diameter;
+            get { lock (_lock) { return _position; } }
         }
 
-    #endregion ctor
+        public IVector Velocity
+        {
+            get { lock (_lock) { return _velocity; } }
+            set { lock (_lock) { _velocity = value; } }
+        }
 
-    #region IBall
+        public event EventHandler<IVector>? NewPositionNotification;
 
-    public event EventHandler<IVector>? NewPositionNotification;
+        internal Ball(Vector initialPosition, Vector initialVelocity, double diameter, double mass)
+        {
+            _position = initialPosition;
+            _velocity = initialVelocity;
+            Diameter = diameter;
+            Mass = mass;
+        }
 
-    public IVector Velocity { get; set; }
-
-    #endregion IBall
-
-    #region private
-
-    private void RaiseNewPositionChangeNotification()
-    {
-      NewPositionNotification?.Invoke(this, Position);
+        internal void Move()
+        {
+            lock (_lock)
+            {
+                _position = new Vector(_position.x + _velocity.x, _position.y + _velocity.y);
+            }
+            NewPositionNotification?.Invoke(this, Position);
+        }
     }
-
-    internal void Move()
-    {
-      Position = new Vector(Position.x + Velocity.x, Position.y + Velocity.y);
-      RaiseNewPositionChangeNotification();
-    }
-
-    #endregion private
-  }
 }
