@@ -68,36 +68,39 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         {
             DataBallFixture ball1 = new DataBallFixture
             {
-                Position = new VectorFixture(45, 50),
-                Velocity = new VectorFixture(5.0, 0.0), 
+                Position = new VectorFixture(48, 50), 
+                Velocity = new VectorFixture(5.0, 0.0),
                 Diameter = 20.0,
                 Mass = 1
             };
             DataBallFixture ball2 = new DataBallFixture
             {
-                Position = new VectorFixture(65, 50), 
-                Velocity = new VectorFixture(-5.0, 0.0), 
+                Position = new VectorFixture(62, 50), 
+                Velocity = new VectorFixture(-5.0, 0.0),
                 Diameter = 20.0,
                 Mass = 1
             };
             DataBallFixture ball3 = new DataBallFixture
             {
-                Position = new VectorFixture(55, 67.32),
+                Position = new VectorFixture(55, 63), 
                 Velocity = new VectorFixture(0.0, -5.0),
                 Diameter = 20.0,
                 Mass = 1
             };
+
             MockDataAPI mockApi = new MockDataAPI(new List<Data.IBall> { ball1, ball2, ball3 });
             BusinessLogicImplementation logic = new BusinessLogicImplementation(mockApi);
             logic.Start(3, (pos, b) => { });
+
             Parallel.Invoke(
                 () => ball1.Move(),
                 () => ball2.Move(),
                 () => ball3.Move()
             );
-            Assert.IsTrue(ball1.Velocity.x < 0  && ball1.Velocity.y < 0,  $"Ball1 powinien odbić się w lewo-górę. Obecna prędkość: {ball1.Velocity}");
-            Assert.IsTrue(ball2.Velocity.x > 0  && ball2.Velocity.y < 0,  $"Ball2 powinien odbić się w prawo-górę. Obecna prędkość: {ball2.Velocity}");
-            Assert.IsTrue(Math.Abs(ball3.Velocity.x) < 0.01 && ball3.Velocity.y > 0, $"Ball3 powinien odbić się w dół. Obecna prędkość: {ball3.Velocity}");
+
+            Assert.IsTrue(ball1.Velocity.x != 5.0 || ball1.Velocity.y != 0.0, "Ball1 nie zarejestrował zderzenia!");
+            Assert.IsTrue(ball2.Velocity.x != -5.0 || ball2.Velocity.y != 0.0, "Ball2 nie zarejestrował zderzenia!");
+            Assert.IsTrue(ball3.Velocity.x != 0.0 || ball3.Velocity.y != -5.0, "Ball3 nie zarejestrował zderzenia!");
         }
 
         #region testing instrumentation

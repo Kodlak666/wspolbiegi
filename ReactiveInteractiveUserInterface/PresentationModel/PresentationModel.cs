@@ -63,7 +63,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
         private readonly IObservable<EventPattern<BallChaneEventArgs>> eventObservable;
         private readonly UnderneathLayerAPI layerBellow;
 
-        private readonly double _logicalWidth = 800;
+        private readonly double _logicalWidth = 420;
         private readonly double _logicalHeight = 400;
 
         private double _canvasWidth;
@@ -74,11 +74,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             double scaleX = _canvasWidth / _logicalWidth;
             double scaleY = _canvasHeight / _logicalHeight;
 
-            // Tworzymy nową kulę. Pamiętaj: w pliku ModelBall.cs właściwość Diameter musi wyglądać tak: 
-            // public double Diameter { get; set; }  <-- bez słówka private!
             ModelBall newBall = new ModelBall(position.x, position.y, ball, scaleX, scaleY) { Diameter = ball.Diameter * scaleX };
 
-            // Bezpieczne wywołanie zdarzenia chroniące przed crashami
             BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
         }
 

@@ -78,7 +78,8 @@ namespace TP.ConcurrentProgramming.Data.Test
                 await ballCreated.Task;
                 await Task.Delay(200);
 
-                Assert.IsTrue(moveCount > 1, $"Kula powinna wykonać ruch. Zarejestrowano {moveCount} powiadomień.");
+                Assert.IsTrue(moveCount >= 8, $"Kula porusza się zbyt wolno! Oczekiwano ok. 12 ruchów, było: {moveCount}");
+                Assert.IsTrue(moveCount <= 16, $"Kula porusza się zbyt szybko! Oczekiwano ok. 12 ruchów, było: {moveCount}");
             }
         }
     }

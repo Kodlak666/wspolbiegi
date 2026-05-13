@@ -9,11 +9,14 @@ namespace TP.ConcurrentProgramming.Data
         private readonly Random _random = new();
         private CancellationTokenSource? _cancelSource;
 
-        private readonly double _boardWidth = 800;
+        private readonly double _boardWidth = 420;
         private readonly double _boardHeight = 400;
 
         public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
         {
+            _cancelSource?.Cancel();
+            _balls.Clear();
+
             _cancelSource = new CancellationTokenSource();
 
             for (int i = 0; i < numberOfBalls; i++)
@@ -27,8 +30,8 @@ namespace TP.ConcurrentProgramming.Data
                 double vx = (_random.NextDouble() * 4.0) - 2.0;
                 double vy = (_random.NextDouble() * 4.0) - 2.0;
 
-                if (vx == 0) vx = 1.0;
-                if (vy == 0) vy = 1.0;
+                if (Math.Abs(vx) < 0.1) vx = 1.0;
+                if (Math.Abs(vy) < 0.1) vy = 1.0;
 
                 Ball newBall = new Ball(
                     new Vector(x, y),
