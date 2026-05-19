@@ -61,25 +61,55 @@ namespace TP.ConcurrentProgramming.Data.Test
                 Assert.IsTrue(numberOfCallbackInvoked >= numberOfBalls2Create);
             }
         }
+
         [TestMethod]
         public async Task AsyncMovementTestMethod()
         {
+            int numberOfBalls = 5;
+            var moveCounts = new System.Collections.Concurrent.ConcurrentDictionary<Data.IBall, int>();
+            int ballsCreatedCount = 0;
+            TaskCompletionSource<bool> allBallsCreated = new TaskCompletionSource<bool>();
+
             using (DataImplementation newInstance = new DataImplementation())
             {
-                int moveCount = 0;
-                TaskCompletionSource<bool> ballCreated = new TaskCompletionSource<bool>();
-
-                newInstance.Start(1, (pos, ball) =>
+                newInstance.Start(numberOfBalls, (pos, ball) =>
                 {
-                    ball.NewPositionNotification += (s, p) => moveCount++;
-                    ballCreated.SetResult(true);
+                    moveCounts.TryAdd(ball, 0);
+
+                    ball.NewPositionNotification += (s, p) =>
+                    {
+                        moveCounts.AddOrUpdate(ball, 1, (key, oldValue) => oldValue + 1);
+                    };
+
+                    if (System.Threading.Interlocked.Increment(ref ballsCreatedCount) == numberOfBalls)
+                    {
+                        allBallsCreated.TrySetResult(true);
+                    }
                 });
 
-                await ballCreated.Task;
+                await allBallsCreated.Task;
+
+                foreach (var key in moveCounts.Keys)
+                {
+                    moveCounts[key] = 0;
+                }
+
                 await Task.Delay(200);
 
-                Assert.IsTrue(moveCount >= 8, $"Kula porusza się zbyt wolno! Oczekiwano ok. 12 ruchów, było: {moveCount}");
-                Assert.IsTrue(moveCount <= 16, $"Kula porusza się zbyt szybko! Oczekiwano ok. 12 ruchów, było: {moveCount}");
+                var counts = moveCounts.Values.ToList();
+                int maxMoves = counts.Max();
+                int minMoves = counts.Min();
+                int averageMoves = (int)counts.Average();
+
+                Assert.IsTrue(averageMoves > 0, "Kule nie wykonały żadnego ruchu!");
+                foreach (var kvp in moveCounts)
+                {
+                    Data.IBall currentBall = kvp.Key;
+                    int count = kvp.Value;
+
+                    Assert.IsTrue(Math.Abs(count - averageMoves) <= 1,
+                        $"Niesprawiedliwy przydział wątków! Średnia ruchów to {averageMoves}, ale kula {currentBall.GetHashCode()} wykonała {count} ruchów (Różnica większa niż +-1).");
+                }
             }
         }
     }
