@@ -94,7 +94,7 @@ namespace TP.ConcurrentProgramming.Data.Test
                     moveCounts[key] = 0;
                 }
 
-                await Task.Delay(200);
+                await Task.Delay(2000);
 
                 var counts = moveCounts.Values.ToList();
                 int maxMoves = counts.Max();
@@ -107,8 +107,9 @@ namespace TP.ConcurrentProgramming.Data.Test
                     Data.IBall currentBall = kvp.Key;
                     int count = kvp.Value;
 
-                    Assert.IsTrue(Math.Abs(count - averageMoves) <= 1,
-                        $"Niesprawiedliwy przydział wątków! Średnia ruchów to {averageMoves}, ale kula {currentBall.GetHashCode()} wykonała {count} ruchów (Różnica większa niż +-1).");
+                    
+                    Assert.IsTrue(Math.Abs(count - 2000/16) <= 1,
+                        $"Niesprawiedliwy przydział. Średnia ruchów to {averageMoves}, ale kula {currentBall.GetHashCode()} wykonała {count} ruchów (Różnica większa niż +-1).");
                 }
             }
         }
