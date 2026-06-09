@@ -45,6 +45,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             {
                 NewPositionNotification?.Invoke(this, Position);
             }
+            public void SetPosition(double x, double y)
+            {
+            }
         }
 
         private class VectorFixture : Data.IVector

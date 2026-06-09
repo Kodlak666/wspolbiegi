@@ -11,6 +11,8 @@ namespace TP.ConcurrentProgramming.Data
 
         public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
+        public abstract void UpdateMousePosition(double x, double y);
+
         public abstract void Dispose();
 
         private static Lazy<DataAbstractAPI> modelInstance = new Lazy<DataAbstractAPI>(() => new DataImplementation());
@@ -26,10 +28,9 @@ namespace TP.ConcurrentProgramming.Data
     {
         event EventHandler<IVector> NewPositionNotification;
         IVector Velocity { get; set; }
-
-        // Te właściwości są kluczowe do logiki i testów!
         IVector Position { get; }
         double Diameter { get; }
         double Mass { get; }
+        void SetPosition(double x, double y);
     }
 }

@@ -113,6 +113,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             {
                 _predefinedBalls = predefinedBalls ?? new List<Data.IBall>();
             }
+            public override void UpdateMousePosition(double x, double y)
+            {
+                // Pusta metoda dla kompilatora w teście
+            }
 
             public override void Start(int numberOfBalls, Action<Data.IVector, Data.IBall> upperLayerHandler)
             {
@@ -148,6 +152,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             internal void Move()
             {
                 NewPositionNotification?.Invoke(this, new VectorFixture(0.0, 0.0));
+            }
+            public void SetPosition(double x, double y)
+            {
+                // Pusta metoda dla kompilatora w teście
             }
         }
 

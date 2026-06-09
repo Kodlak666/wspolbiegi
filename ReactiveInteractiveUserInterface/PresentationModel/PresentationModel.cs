@@ -37,6 +37,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
             Disposed = true;
         }
 
+        public override void UpdateMousePosition(double x, double y)
+        {
+            // Zamień "LogicLayer" na nazwę zmiennej, pod którą trzymasz API warstwy Logiki Biznesowej
+            layerBellow.UpdateMousePosition(x, y);
+        }
+
         public override IDisposable Subscribe(IObserver<IBall> observer)
         {
             return eventObservable.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
