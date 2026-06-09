@@ -39,5 +39,15 @@ namespace TP.ConcurrentProgramming.PresentationView
         viewModel.Dispose();
       base.OnClosed(e);
     }
-  }
+
+        private void Canvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            var position = e.GetPosition((System.Windows.IInputElement)sender);
+
+            if (DataContext is TP.ConcurrentProgramming.Presentation.ViewModel.MainWindowViewModel vm)
+            {
+                vm.UpdateMouseBall(position.X, position.Y);
+            }
+        }
+    }
 }

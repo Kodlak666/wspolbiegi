@@ -40,5 +40,16 @@ namespace TP.ConcurrentProgramming.Data
             }
             NewPositionNotification?.Invoke(this, Position);
         }
+
+        // NOWE: Metoda do twardego nadpisywania pozycji przez myszkę
+        public void SetPosition(double x, double y)
+        {
+            lock (_lock)
+            {
+                _position = new Vector(x, y);
+            }
+            // Ważne: powiadamiamy UI o nowej pozycji z myszki
+            NewPositionNotification?.Invoke(this, Position);
+        }
     }
 }

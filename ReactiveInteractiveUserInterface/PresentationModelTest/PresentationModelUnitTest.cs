@@ -72,9 +72,13 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
         NumberOfBalls = numberOfBalls;
         Assert.IsNotNull(upperLayerHandler);
       }
+            public override void UpdateMousePosition(double x, double y)
+            {
+                // Pusta metoda dla kompilatora w teście
+            }
 
-      #endregion BusinessLogicAbstractAPI
-    }
+            #endregion BusinessLogicAbstractAPI
+        }
 
     #endregion testing instrumentation
   }

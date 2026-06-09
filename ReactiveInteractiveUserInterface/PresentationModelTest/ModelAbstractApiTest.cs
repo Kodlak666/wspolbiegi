@@ -21,5 +21,7 @@ namespace TP.ConcurrentProgramming.PresentationModelTest
       ModelAbstractApi instance2 = ModelAbstractApi.CreateModel();
       Assert.AreSame<ModelAbstractApi>(instance1, instance2);
     }
+
+
   }
 }

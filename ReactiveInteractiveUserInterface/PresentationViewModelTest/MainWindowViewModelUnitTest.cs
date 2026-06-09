@@ -81,8 +81,12 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       {
         Started = numberOfBalls;
       }
+            public override void UpdateMousePosition(double x, double y)
+            {
+                // Pusta metoda dla kompilatora w teście
+            }
 
-      public override IDisposable Subscribe(IObserver<ModelIBall> observer)
+            public override IDisposable Subscribe(IObserver<ModelIBall> observer)
       {
         Subscribed++;
         return new NullDisposable();
@@ -133,8 +137,12 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
           BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
         }
       }
+            public override void UpdateMousePosition(double x, double y)
+            {
+                // Pusta metoda dla kompilatora w teście
+            }
 
-      public override void Dispose()
+            public override void Dispose()
       {
         Disposed = true;
       }

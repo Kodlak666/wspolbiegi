@@ -25,8 +25,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     {
       return modelInstance.Value;
     }
-
-    public abstract void Start(int numberOfBalls, double canvasWidth, double canvasHeight);
+        public abstract void UpdateMousePosition(double x, double y);
+        public abstract void Start(int numberOfBalls, double canvasWidth, double canvasHeight);
 
     #region IObservable
 

@@ -26,7 +26,8 @@
             <Button Content="Start" Click="StartButton_Click" Width="100" Padding="5" FontSize="14" Cursor="Hand"/>
         </StackPanel>
 
-        <Border Grid.Row="1" BorderThickness="4" BorderBrush="Green" Height="400" Width="420" HorizontalAlignment="Center">
+        <Border Grid.Row="1" BorderThickness="4" BorderBrush="Green" Height="400" Width="420" 
+        HorizontalAlignment="Center" Background="Transparent" MouseMove="Canvas_MouseMove">
             <ItemsControl ItemsSource="{Binding Balls}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

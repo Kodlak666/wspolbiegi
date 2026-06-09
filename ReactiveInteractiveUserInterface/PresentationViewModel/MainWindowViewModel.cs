@@ -80,7 +80,13 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       }
     }
 
-    public void Dispose()
+        public void UpdateMouseBall(double x, double y)
+        {
+            // Omijamy timery (reaktywność) i zrzucamy pozycję od razu w dół
+            ModelLayer.UpdateMousePosition(x, y);
+        }
+
+        public void Dispose()
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(MainWindowViewModel));
