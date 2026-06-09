@@ -2,35 +2,58 @@
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
-    public abstract class BusinessLogicAbstractAPI : IDisposable
+  public abstract class BusinessLogicAbstractAPI : IDisposable
+  {
+    #region Layer Factory
+
+    public static BusinessLogicAbstractAPI GetBusinessLogicLayer()
     {
-        // Wstrzykiwanie Zależności (DI) - możemy przekazać fake'ową warstwę Danych
-        public static BusinessLogicAbstractAPI GetBusinessLogicLayer(Data.DataAbstractAPI dataLayer = null)
-        {
-            return new BusinessLogicImplementation(dataLayer ?? Data.DataAbstractAPI.GetDataLayer());
-        }
+      return modelInstance.Value;
+    }
+
+        #endregion Layer Factory
+
+        #region Layer API
 
         public static Dimensions GetDimensions => new Dimensions(800, 400, 10);
 
-        public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
+    public abstract void Start(int numberOfBalls, Action<IPosition, IBall> upperLayerHandler);
+    public abstract void UpdateMousePosition(double x, double y);
 
-        // POPRAWKA: Metoda jest teraz poprawnie wewnątrz klasy API (a nie w interfejsie IBall)
-        public abstract void UpdateMousePosition(double x, double y);
+    #region IDisposable
 
-        public abstract void Dispose();
-    }
+    public abstract void Dispose();
 
-    public record Dimensions(double BallDimension, double TableHeight, double TableWidth);
+    #endregion IDisposable
 
-    public interface IPosition
-    {
-        double x { get; init; }
-        double y { get; init; }
-    }
+    #endregion Layer API
 
-    public interface IBall
-    {
-        event EventHandler<IPosition> NewPositionNotification;
-        double Diameter { get; }
-    }
+    #region private
+
+    private static Lazy<BusinessLogicAbstractAPI> modelInstance = new Lazy<BusinessLogicAbstractAPI>(() => new BusinessLogicImplementation());
+
+    #endregion private
+  }
+  /// <summary>
+  /// Immutable type representing table dimensions
+  /// </summary>
+  /// <param name="BallDimension"></param>
+  /// <param name="TableHeight"></param>
+  /// <param name="TableWidth"></param>
+  /// <remarks>
+  /// Must be abstract
+  /// </remarks>
+  public record Dimensions(double BallDimension, double TableHeight, double TableWidth);
+
+  public interface IPosition
+  {
+    double x { get; init; }
+    double y { get; init; }
+  }
+
+  public interface IBall 
+  {
+    event EventHandler<IPosition> NewPositionNotification;
+    double Diameter { get; }
+  }
 }
