@@ -25,7 +25,7 @@ namespace TP.ConcurrentProgramming.Data
             _balls.Clear();
             _cancelSource = new CancellationTokenSource();
 
-            double speed = 200;
+            double speed = 800;
 
             for (int i = 0; i < numberOfBalls; i++)
             {
@@ -54,7 +54,7 @@ namespace TP.ConcurrentProgramming.Data
                 upperLayerHandler(newBall.Position, newBall);
 
                 // Przekazujemy flagę, czy to kulka myszki
-                Task.Run(() => BallMovementLoop(newBall, _cancelSource.Token, isMouseBall: i == 0));
+                Task.Run(() => BallMovementLoop(newBall, _cancelSource.Token));
             }
         }
 
@@ -67,31 +67,43 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
-        private async Task BallMovementLoop(Ball ball, CancellationToken token, bool isMouseBall)
+        private async Task BallMovementLoop(Ball ball, CancellationToken token)
         {
             int targetDelay = 16;
-            Stopwatch stopwatch = new Stopwatch();
+
+            // Uruchamiamy stoper RAZ i już go nie restartujemy
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            // Zmienne do śledzenia czasu
+            long lastTick = stopwatch.ElapsedMilliseconds;
+            long nextTick = lastTick;
 
             while (!token.IsCancellationRequested)
             {
-                stopwatch.Restart();
+                long currentTick = stopwatch.ElapsedMilliseconds;
 
-                // Kulka myszkowa nie porusza się sama według wektora prędkości
-                if (!isMouseBall)
-                {
-                    ball.Move(stopwatch.ElapsedMilliseconds * 0.001f);
-                }
+                // Obliczamy PRAWDZIWY deltatime (różnica czasu między klatkami w sekundach)
+                double deltaTime = (currentTick - lastTick) * 0.001;
 
-                // Logujemy diagnostykę do pliku
+                // Zabezpieczenie: w pierwszej klatce czas może być 0, więc dajemy domyślne 16ms
+                if (deltaTime <= 0) deltaTime = 0.016;
+
+                lastTick = currentTick;
+
+                // Wywołujemy Move dla KAŻDEJ kulki. 
+                // Kulka-myszka ma prędkość 0, więc się nie ruszy z miejsca, 
+                // ale WYŚLE EVENT do testu jednostkowego!
+                ball.Move(deltaTime);
+
                 _logger.Log($"Ball {ball.GetHashCode()} moved to X:{ball.Position.x:F2} Y:{ball.Position.y:F2}");
 
-                stopwatch.Stop();
-                int elapsed = (int)stopwatch.ElapsedMilliseconds;
-                int remainingDelay = targetDelay - elapsed;
+                // Deterministyczne wyrównywanie czasu (żeby test na 125 ruchów przechodził)
+                nextTick += targetDelay;
+                long delay = nextTick - stopwatch.ElapsedMilliseconds;
 
-                if (remainingDelay > 0)
+                if (delay > 0)
                 {
-                    await Task.Delay(remainingDelay, token).ContinueWith(_ => { });
+                    await Task.Delay((int)delay, token).ContinueWith(_ => { });
                 }
                 else
                 {

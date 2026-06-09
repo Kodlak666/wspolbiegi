@@ -82,7 +82,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             bool velocityChanged = false;
 
             // Hard Limit: Ograniczamy maksymalną prędkość, żeby kule nie ignorowały ścian
-            double maxSpeed = 10.0;
+            double maxSpeed = 1000.0;
             if (newVx > maxSpeed) { newVx = maxSpeed; velocityChanged = true; }
             if (newVx < -maxSpeed) { newVx = -maxSpeed; velocityChanged = true; }
             if (newVy > maxSpeed) { newVy = maxSpeed; velocityChanged = true; }
@@ -152,7 +152,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                             if (distance == 0) distance = 1;
 
                             // Ustawiamy stałą, szybką prędkość po uderzeniu myszką
-                            double kickForce = 8.0;
+                            double kickForce = 600.0;
 
                             normalBall.Velocity = new Data.Vector(
                                 (pushX / distance) * kickForce,
