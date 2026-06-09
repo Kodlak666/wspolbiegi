@@ -109,6 +109,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         {
             private List<Data.IBall> _predefinedBalls;
 
+            public override void LogDiagnosticData(string message)
+            {
+                // Pusta metoda dla kompilatora w testach
+            }
+
             public MockDataAPI(List<Data.IBall> predefinedBalls = null)
             {
                 _predefinedBalls = predefinedBalls ?? new List<Data.IBall>();

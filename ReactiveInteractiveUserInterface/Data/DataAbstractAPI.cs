@@ -12,6 +12,7 @@ namespace TP.ConcurrentProgramming.Data
         public abstract void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler);
 
         public abstract void UpdateMousePosition(double x, double y);
+        public abstract void LogDiagnosticData(string message);
 
         public abstract void Dispose();
 

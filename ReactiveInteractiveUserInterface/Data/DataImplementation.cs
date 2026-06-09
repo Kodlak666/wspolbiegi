@@ -57,6 +57,10 @@ namespace TP.ConcurrentProgramming.Data
                 Task.Run(() => BallMovementLoop(newBall, _cancelSource.Token));
             }
         }
+        public override void LogDiagnosticData(string message)
+        {
+            _logger.Log(message);
+        }
 
         // Nowa metoda łapiąca pozycję myszki i przypisująca ją do kuli nr 0
         public override void UpdateMousePosition(double x, double y)

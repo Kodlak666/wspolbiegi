@@ -126,6 +126,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
                     if (distanceSquared < minDistance * minDistance)
                     {
+                        // Wysłanie logów o kolizji do warstwy Danych
+                        layerBellow.LogDiagnosticData($"Collision: Ball {b1.GetHashCode()} bounced off Ball {b2.GetHashCode()}");
+                        layerBellow.LogDiagnosticData($"Collision: Ball {b2.GetHashCode()} bounced off Ball {b1.GetHashCode()}");
+
                         var v1 = b1.Velocity;
                         var v2 = b2.Velocity;
 

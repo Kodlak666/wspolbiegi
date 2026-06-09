@@ -24,9 +24,12 @@ namespace TP.ConcurrentProgramming.Data
         {
             if (!_buffer.IsAddingCompleted)
             {
-                // TryAdd NIE blokuje wątku. Jeśli bufor jest pełny (brak przepustowości),
-                // po prostu ignoruje wpis i aplikacja działa dalej płynnie.
-                _buffer.TryAdd($"{DateTime.Now:O}: {message}");
+                // Format Syslog RFC 5424
+                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+                string hostname = System.Net.Dns.GetHostName();
+                string syslogMessage = $"<14>1 {timestamp} {hostname} ConcurrentProgramming - - - {message}";
+
+                _buffer.TryAdd(syslogMessage);
             }
         }
 
