@@ -32,11 +32,11 @@ namespace TP.ConcurrentProgramming.Data
             Mass = mass;
         }
 
-        internal void Move()
+        internal void Move(double deltatime)
         {
             lock (_lock)
             {
-                _position = new Vector(_position.x + _velocity.x, _position.y + _velocity.y);
+                _position = new Vector(_position.x + _velocity.x * deltatime, _position.y + _velocity.y * deltatime);
             }
             NewPositionNotification?.Invoke(this, Position);
         }

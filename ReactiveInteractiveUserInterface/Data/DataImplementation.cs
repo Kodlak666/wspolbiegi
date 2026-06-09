@@ -19,6 +19,8 @@ namespace TP.ConcurrentProgramming.Data
 
             _cancelSource = new CancellationTokenSource();
 
+            double speed = 200;
+
             for (int i = 0; i < numberOfBalls; i++)
             {
                 double diameter = _random.NextDouble() * (30.0 - 10.0) + 10.0;
@@ -27,8 +29,8 @@ namespace TP.ConcurrentProgramming.Data
                 double x = _random.NextDouble() * (_boardWidth - diameter);
                 double y = _random.NextDouble() * (_boardHeight - diameter);
 
-                double vx = (_random.NextDouble() * 4.0) - 2.0;
-                double vy = (_random.NextDouble() * 4.0) - 2.0;
+                double vx = (_random.NextDouble() * speed) - (speed / 2);
+                double vy = (_random.NextDouble() * speed) - (speed / 2);
 
                 if (Math.Abs(vx) < 0.1) vx = 1.0;
                 if (Math.Abs(vy) < 0.1) vy = 1.0;
@@ -50,9 +52,13 @@ namespace TP.ConcurrentProgramming.Data
 
         private async Task BallMovementLoop(Ball ball, CancellationToken token)
         {
+            Stopwatch watch = new Stopwatch();
+
             while (!token.IsCancellationRequested)
             {
-                ball.Move();
+                watch.Stop();
+                ball.Move(watch.ElapsedMilliseconds * 0.001f);
+                watch.Restart();
                 await Task.Delay(16, token).ContinueWith(_ => { });
             }
         }
